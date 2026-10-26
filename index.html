@@ -866,6 +866,34 @@
       color: var(--accent-primary);
     }
 
+    /* Historical analytics charts */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .analytics-card {
+      min-width: 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.15rem;
+    }
+    .analytics-subtitle {
+      color: var(--text-dim);
+      font-size: .75rem;
+      line-height: 1.45;
+      margin: .35rem 0 .8rem;
+    }
+    .analytics-chart { width: 100%; min-height: 220px; }
+    .analytics-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .analytics-legend { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: .5rem; color: var(--text-muted); font-size: .72rem; }
+    .analytics-legend span { display: inline-flex; align-items: center; gap: .3rem; }
+    .analytics-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .analytics-empty { display:flex; align-items:center; justify-content:center; min-height:190px; color:var(--text-dim); font-size:.82rem; text-align:center; padding:1rem; }
+    @media (max-width: 900px) { .analytics-grid { grid-template-columns: 1fr; } }
+
     /* 13-Station Pipeline Visualizer */
     .pipeline-container {
       background: var(--bg-surface);
@@ -1761,6 +1789,32 @@
       </div>
     </section>
 
+    <!-- Historical Analytics: reconstructed snapshots, not raw event totals -->
+    <section class="analytics-grid" id="historicalAnalyticsSection">
+      <div class="analytics-card">
+        <div class="section-title">
+          <svg class="icon" style="color: var(--status-done);" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+          Historical Packaging Progress
+        </div>
+        <div class="analytics-subtitle">Cumulative harnesses reaching PACKAGING with status DONE, reconstructed at the end of each recorded date. Latest 30 dates shown.</div>
+        <div class="analytics-chart" id="packagingTrendChart"><div class="analytics-empty">Waiting for history data…</div></div>
+        <div class="analytics-legend"><span><i style="background:#10b981"></i>Packaged & ready</span></div>
+      </div>
+      <div class="analytics-card">
+        <div class="section-title">
+          <svg class="icon" style="color: var(--status-rework);" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          Production Health Trend
+        </div>
+        <div class="analytics-subtitle">Harnesses whose latest recorded state was OG, REWORK, or STOPPED on each date. These are snapshot counts, not event totals.</div>
+        <div class="analytics-chart" id="statusTrendChart"><div class="analytics-empty">Waiting for history data…</div></div>
+        <div class="analytics-legend">
+          <span><i style="background:#3b82f6"></i>OG</span>
+          <span><i style="background:#f59e0b"></i>Rework</span>
+          <span><i style="background:#ef4444"></i>Stopped</span>
+        </div>
+      </div>
+    </section>
+
     <!-- Defect & Quality Ledger Section -->
     <section class="quality-container">
       <div class="table-toolbar">
@@ -1879,9 +1933,24 @@
 
   <script>
     const DEFAULT_CONFIG = {
-      L461_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO22eGE_u31vN3cAYC4AYPwpkbeOrA_0L5_dU-9qQSSHO8LKQk42wZV64KJZ0L5lmjoc0Semx1ZD1J/pub?gid=652842013&single=true&output=csv',
-      L460_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRfVUTiVDJZYzOtCDeVSX5BsSRFkJSp6APZn3DLe8LTqmpfvfWJvmPwRBlrymKtJ5_xB32bRmsCqKhS/pub?gid=652842013&single=true&output=csv'
+      L461_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7Zpww6tdwDQSwGJ9QxzFtKEtGCc-1_4b3b2zrPUmlm6T-zV4M9tKAXAJsSCU9_5TcAN8exaScFEqW/pub?gid=71854974&single=true&output=csv',
+      L460_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQUbbzRRU7MVBUEMtlwvaqr0zbXvc-vmKnjwTVX1r-8-dBFP7YqJOXo1EjBqlXHAimGxZM0qysGTccs/pub?gid=2047715098&single=true&output=csv',
+      L461_HISTORY_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlqmo8pfpo7LYbBvrqLuielGXFdqrIypebjRcO_Ph2IwW1lHrKw-ohS5JctaJ72MGd9pBMBkxew5v7/pub?gid=2094321585&single=true&output=csv',
+      L460_HISTORY_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdaOZBWx_0wYOq7Bu-LvTxaST0MONyHF3mKNnwUw5UrTIV735knC34GAlWu3DvcGW6gG1Pq6juwvya/pub?gid=1201534735&single=true&output=csv'
     };
+
+    // URL settings are namespaced by the current hard-coded links. If the links
+    // are changed in this file and redeployed, old browser overrides are ignored.
+    // Settings saved through the configuration window still override these defaults.
+    function getUrlStorageKey(name) {
+      const seed = Object.values(DEFAULT_CONFIG).join('|');
+      let hash = 2166136261;
+      for (let i = 0; i < seed.length; i++) {
+        hash ^= seed.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return `PROTO_URLCFG_${(hash >>> 0).toString(16)}_${name}`;
+    }
 
     const STATION_PIPELINE = [
       "KSK & Pre-Assy", "INSERTION", "BANDAGE", "OUT OF LINE",
@@ -2090,9 +2159,9 @@
     function loadStoredConfig() {
       try {
         const configKey = getActiveConfigKey();
-        const activeUrl = localStorage.getItem(`PROTO_URL_${configKey}`) || '';
-        const storedL461 = localStorage.getItem('PROTO_L461_URL') || DEFAULT_CONFIG.L461_URL;
-        const storedL460 = localStorage.getItem('PROTO_L460_URL') || DEFAULT_CONFIG.L460_URL;
+        const activeUrl = localStorage.getItem(getUrlStorageKey(`URL_${configKey}`)) || '';
+        const storedL461 = localStorage.getItem(getUrlStorageKey('L461_URL')) || DEFAULT_CONFIG.L461_URL;
+        const storedL460 = localStorage.getItem(getUrlStorageKey('L460_URL')) || DEFAULT_CONFIG.L460_URL;
 
         const activeInput = document.getElementById('currentConfigUrlInput');
         const l461HistoryInput = document.getElementById('l461HistoryUrlInput');
@@ -2101,8 +2170,8 @@
         const l460Input = document.getElementById('l460UrlInput');
 
         if (activeInput) activeInput.value = activeUrl;
-        if (l461HistoryInput) l461HistoryInput.value = localStorage.getItem('PROTO_L461_HISTORY_URL') || '';
-        if (l460HistoryInput) l460HistoryInput.value = localStorage.getItem('PROTO_L460_HISTORY_URL') || '';
+        if (l461HistoryInput) l461HistoryInput.value = localStorage.getItem(getUrlStorageKey('L461_HISTORY_URL')) || DEFAULT_CONFIG.L461_HISTORY_URL;
+        if (l460HistoryInput) l460HistoryInput.value = localStorage.getItem(getUrlStorageKey('L460_HISTORY_URL')) || DEFAULT_CONFIG.L460_HISTORY_URL;
         if (l461Input) l461Input.value = storedL461;
         if (l460Input) l460Input.value = storedL460;
 
@@ -2132,18 +2201,20 @@
       try {
         const configKey = getActiveConfigKey();
         if (activeUrlVal) {
-          localStorage.setItem(`PROTO_URL_${configKey}`, activeUrlVal);
+          localStorage.setItem(getUrlStorageKey(`URL_${configKey}`), activeUrlVal);
         } else {
-          localStorage.removeItem(`PROTO_URL_${configKey}`);
+          localStorage.removeItem(getUrlStorageKey(`URL_${configKey}`));
         }
-        if (l461HistoryVal) localStorage.setItem('PROTO_L461_HISTORY_URL', l461HistoryVal);
-        else localStorage.removeItem('PROTO_L461_HISTORY_URL');
-        if (l460HistoryVal) localStorage.setItem('PROTO_L460_HISTORY_URL', l460HistoryVal);
-        else localStorage.removeItem('PROTO_L460_HISTORY_URL');
+        if (l461HistoryVal) localStorage.setItem(getUrlStorageKey('L461_HISTORY_URL'), l461HistoryVal);
+        else localStorage.removeItem(getUrlStorageKey('L461_HISTORY_URL'));
+        if (l460HistoryVal) localStorage.setItem(getUrlStorageKey('L460_HISTORY_URL'), l460HistoryVal);
+        else localStorage.removeItem(getUrlStorageKey('L460_HISTORY_URL'));
         // Remove the old per-build history setting so the new line-level history links are used.
-        localStorage.removeItem(`PROTO_HISTORY_URL_${configKey}`);
-        if (l461Val) localStorage.setItem('PROTO_L461_URL', l461Val);
-        if (l460Val) localStorage.setItem('PROTO_L460_URL', l460Val);
+        localStorage.removeItem(getUrlStorageKey(`HISTORY_URL_${configKey}`));
+        if (l461Val) localStorage.setItem(getUrlStorageKey('L461_URL'), l461Val);
+        else localStorage.removeItem(getUrlStorageKey('L461_URL'));
+        if (l460Val) localStorage.setItem(getUrlStorageKey('L460_URL'), l460Val);
+        else localStorage.removeItem(getUrlStorageKey('L460_URL'));
       } catch (e) {}
 
       closeConfigModal();
@@ -2153,13 +2224,13 @@
     function getActiveUrl() {
       try {
         const configKey = getActiveConfigKey();
-        const specificUrl = localStorage.getItem(`PROTO_URL_${configKey}`);
+        const specificUrl = localStorage.getItem(getUrlStorageKey(`URL_${configKey}`));
         if (specificUrl) return specificUrl;
 
         if (currentLine === 'L461') {
-          return localStorage.getItem('PROTO_L461_URL') || DEFAULT_CONFIG.L461_URL;
+          return localStorage.getItem(getUrlStorageKey('L461_URL')) || DEFAULT_CONFIG.L461_URL;
         } else {
-          return localStorage.getItem('PROTO_L460_URL') || DEFAULT_CONFIG.L460_URL;
+          return localStorage.getItem(getUrlStorageKey('L460_URL')) || DEFAULT_CONFIG.L460_URL;
         }
       } catch (e) {
         return currentLine === 'L461' ? DEFAULT_CONFIG.L461_URL : DEFAULT_CONFIG.L460_URL;
@@ -2254,11 +2325,15 @@
     }
 
     function getHistoryUrl() {
+      // Custom links remain editable per browser; hardcoded defaults make the dashboard
+      // work immediately for anyone who opens a fresh copy of this HTML file.
       try {
         return currentLine === 'L461'
-          ? (localStorage.getItem('PROTO_L461_HISTORY_URL') || '')
-          : (localStorage.getItem('PROTO_L460_HISTORY_URL') || '');
-      } catch(e) { return ''; }
+          ? (localStorage.getItem(getUrlStorageKey('L461_HISTORY_URL')) || DEFAULT_CONFIG.L461_HISTORY_URL)
+          : (localStorage.getItem(getUrlStorageKey('L460_HISTORY_URL')) || DEFAULT_CONFIG.L460_HISTORY_URL);
+      } catch(e) {
+        return currentLine === 'L461' ? DEFAULT_CONFIG.L461_HISTORY_URL : DEFAULT_CONFIG.L460_HISTORY_URL;
+      }
     }
 
     // Robust DateTime Parser supporting all formats (MM/DD/YYYY, M/D/YY, ISO, 14-digit AppSheet)
@@ -2471,6 +2546,8 @@
             historyLoaded = true;
             updateHistoryPicker();
             setHistoryStatus(`${mapped.length.toLocaleString()} history entries • ${historyDatesStore[configKey].length} dates`);
+            renderDefectPareto(currentFilteredUnits);
+            renderAnalyticsCharts();
             if (historyMode === 'HISTORY' && historySelectedDate) renderHistoricalDate(historySelectedDate);
           },
           error: function(err) { setHistoryStatus('History parse error'); console.error(err); }
@@ -2762,6 +2839,7 @@
             showToast(`Loaded ${results.data.length} live records from ${file.name}`);
             if (historyRowsStore[configKey] && historyRowsStore[configKey].length) {
               historyRowsStore[configKey] = normalizeHistoryRows(historyRowsStore[configKey], results.data);
+              renderDefectPareto(currentFilteredUnits);
             }
           } else {
             alert('No data rows found in selected CSV.');
@@ -2795,6 +2873,7 @@
             updateHistoryPicker();
             setHistoryStatus(`${mapped.length.toLocaleString()} history entries • ${historyDatesStore[configKey].length} dates from ${file.name}`);
             showToast(`Loaded ${mapped.length} history records across ${historyDatesStore[configKey].length} dates`);
+            renderDefectPareto(currentFilteredUnits);
             if (historyDatesStore[configKey].length > 0) {
               const latestDate = historyDatesStore[configKey][historyDatesStore[configKey].length - 1];
               const picker = document.getElementById('historyDatePicker');
@@ -3018,6 +3097,7 @@
       renderFamilyBreakdown(currentFilteredUnits);
       renderPowertrainBreakdown(currentFilteredUnits);
       renderDefectPareto(currentFilteredUnits);
+      renderAnalyticsCharts();
       renderDefectTable();
     }
 
@@ -3329,30 +3409,163 @@
       });
     }
 
-    function renderDefectPareto(units) {
-      const list = document.getElementById('defectParetoList');
-      list.innerHTML = '';
+    function renderAnalyticsCharts() {
+      const configKey = getActiveConfigKey();
+      const dates = historyDatesStore[configKey] || [];
+      const historyAvailable = Array.isArray(historyRowsStore[configKey]) && historyRowsStore[configKey].length > 0;
+      const packagingHost = document.getElementById('packagingTrendChart');
+      const statusHost = document.getElementById('statusTrendChart');
+      if (!packagingHost || !statusHost) return;
+      if (!historyAvailable || dates.length === 0) {
+        const message = '<div class="analytics-empty">Historical CSV is not loaded or contains no dated records.</div>';
+        packagingHost.innerHTML = message;
+        statusHost.innerHTML = message;
+        return;
+      }
 
-      const defectCountMap = new Map();
-      units.forEach(u => {
-        if (u.status === 'REWORK' || u.status === 'STOPPED' || (u.reworkType && u.reworkType.trim())) {
-          let cat = (u.reworkType || 'Uncategorized Quality Check').trim();
-          // Normalize defect categories
-          if (cat.toLowerCase().includes('terminal')) cat = 'Terminal Damage / Voie';
-          else if (cat.toLowerCase().includes('circuit')) cat = 'Circuit Cut / Length Variance';
-          else if (cat.toLowerCase().includes('grommet')) cat = 'Grommet Missing / Damaged';
-          else if (cat.toLowerCase().includes('insertion')) cat = 'Insertion Defect';
-          else if (cat.toLowerCase().includes('sertissage')) cat = 'Crimping / Sertissage';
-
-          defectCountMap.set(cat, (defectCountMap.get(cat) || 0) + 1);
-        }
+      // Reconstruct each selected date into one latest state per IO. Never sum raw history events.
+      const selectedDates = dates.slice(-30);
+      const weekFilter = document.getElementById('filterWeek')?.value || 'ALL';
+      const familyFilter = document.getElementById('filterFamily')?.value || 'ALL';
+      const ptFilter = document.getElementById('filterPowertrain')?.value || 'ALL';
+      const points = [];
+      selectedDates.forEach(date => {
+        const snapshot = reconstructRowsAtDate(date);
+        const filtered = snapshot.filter(r => {
+          const week = String(r.Week || '').trim();
+          const family = String(r.Familly || r.Family || 'Standard').trim();
+          const bev = String(r.BEV || 'ICE').trim().toUpperCase();
+          const phev = String(r.PHEV || 'NON PHEV').trim().toUpperCase();
+          const pt = phev === 'PHEV' ? 'PHEV' : ((bev === 'BEV' || bev.includes('BEV')) ? 'BEV' : 'ICE');
+          return (weekFilter === 'ALL' || week === weekFilter) &&
+                 (familyFilter === 'ALL' || family === familyFilter) &&
+                 (ptFilter === 'ALL' || pt === ptFilter);
+        });
+        const statusCounts = { og: 0, rework: 0, stopped: 0 };
+        let packaged = 0;
+        filtered.forEach(r => {
+          const status = String(r.Status || '').trim().toUpperCase();
+          const station = String(r.Station || '').trim().toUpperCase();
+          if (station === 'PACKAGING' && status === 'DONE') packaged++;
+          if (status === 'OG') statusCounts.og++;
+          else if (status === 'REWORK') statusCounts.rework++;
+          else if (status === 'STOPPED') statusCounts.stopped++;
+        });
+        points.push({ date, packaged, ...statusCounts });
       });
 
-      const sorted = Array.from(defectCountMap.entries()).sort((a, b) => b[1] - a[1]);
+      const filterLabel = [
+        weekFilter !== 'ALL' ? `Week ${weekFilter}` : '',
+        familyFilter !== 'ALL' ? familyFilter : '',
+        ptFilter !== 'ALL' ? ptFilter : ''
+      ].filter(Boolean).join(' • ');
+      const note = filterLabel ? `Filtered: ${filterLabel}` : '';
+      const packagingSeries = [{ label: 'Packaged & ready', key: 'packaged', color: '#10b981' }];
+      const statusSeries = [
+        { label: 'OG', key: 'og', color: '#3b82f6' },
+        { label: 'Rework', key: 'rework', color: '#f59e0b' },
+        { label: 'Stopped', key: 'stopped', color: '#ef4444' }
+      ];
+      packagingHost.innerHTML = buildAnalyticsLineSvg(points, packagingSeries, 'No dated packaging states available.', note);
+      statusHost.innerHTML = buildAnalyticsLineSvg(points, statusSeries, 'No dated status states available.', note);
+    }
+
+    function buildAnalyticsLineSvg(points, series, emptyMessage, note) {
+      if (!points.length) return `<div class="analytics-empty">${emptyMessage}</div>`;
+      const W = 620, H = 230, left = 42, right = 14, top = 16, bottom = 38;
+      const plotW = W - left - right, plotH = H - top - bottom;
+      const allValues = points.flatMap(p => series.map(s => Number(p[s.key]) || 0));
+      const maxVal = Math.max(1, ...allValues);
+      const niceMax = maxVal <= 5 ? 5 : Math.ceil(maxVal / 5) * 5;
+      const x = i => left + (points.length === 1 ? plotW / 2 : (i / (points.length - 1)) * plotW);
+      const y = v => top + plotH - ((Number(v) || 0) / niceMax) * plotH;
+      let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${series.map(s => s.label).join(', ')} over time">`;
+      for (let tick = 0; tick <= 4; tick++) {
+        const value = niceMax * tick / 4;
+        const yy = y(value);
+        svg += `<line x1="${left}" y1="${yy}" x2="${W-right}" y2="${yy}" stroke="var(--border-subtle)" stroke-width="1"/>`;
+        svg += `<text x="${left-8}" y="${yy+4}" text-anchor="end" font-size="10" fill="var(--text-dim)">${Math.round(value)}</text>`;
+      }
+      series.forEach(s => {
+        const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(2)} ${y(p[s.key]).toFixed(2)}`).join(' ');
+        svg += `<path d="${path}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+        points.forEach((p, i) => {
+          if (points.length <= 12 || i === points.length - 1 || i % 5 === 0) {
+            svg += `<circle cx="${x(i)}" cy="${y(p[s.key])}" r="2.7" fill="${s.color}"><title>${p.date}: ${s.label} ${p[s.key]}</title></circle>`;
+          }
+        });
+      });
+      const labelIndexes = [...new Set([0, Math.floor((points.length-1)/2), points.length-1])];
+      labelIndexes.forEach(i => {
+        const d = points[i].date;
+        const shortDate = d.length >= 10 ? d.slice(5) : d;
+        svg += `<text x="${x(i)}" y="${H-15}" text-anchor="middle" font-size="10" fill="var(--text-dim)">${shortDate}</text>`;
+      });
+      svg += '</svg>';
+      if (note) svg += `<div class="analytics-subtitle" style="margin-bottom:0;">${note}</div>`;
+      return svg;
+    }
+
+    function renderDefectPareto(units) {
+      const list = document.getElementById('defectParetoList');
+      if (!list) return;
+      list.innerHTML = '';
+
+      const configKey = getActiveConfigKey();
+      const historyAvailable = Array.isArray(historyRowsStore[configKey]);
+      const historyRows = historyAvailable ? historyRowsStore[configKey] : [];
+      const liveRows = Array.isArray(units) ? units : [];
+      // Combine current live tracking with historical defect events. The IO Set
+      // below deduplicates the same IO within each defect category across both sources.
+      const sourceRows = [...liveRows, ...historyRows];
+      const weekFilter = document.getElementById('filterWeek')?.value || 'ALL';
+      const familyFilter = document.getElementById('filterFamily')?.value || 'ALL';
+      const ptFilter = document.getElementById('filterPowertrain')?.value || 'ALL';
+      const stationFilter = document.getElementById('filterStationSelect')?.value || 'ALL';
+      const defectCountMap = new Map();
+
+      sourceRows.forEach(r => {
+        const status = String(r.Status ?? r.status ?? '').trim().toUpperCase();
+        const reworkType = String(r['rework type'] ?? r.reworkType ?? r['Rework Type'] ?? r['Defect Type'] ?? '').trim();
+        if (status !== 'REWORK' && status !== 'STOPPED' && !reworkType) return;
+
+        const io = String(r.IO ?? r.io ?? r.Harness_ID ?? r['Harness ID'] ?? '').trim();
+        if (!io) return;
+
+        const station = String(r.Station ?? r.station ?? '').trim();
+        const week = String(r.Week ?? r.week ?? '').trim();
+        const family = String(r.Familly ?? r.Family ?? r.family ?? 'Standard').trim();
+        const bev = String(r.BEV ?? r.bev ?? 'ICE').trim().toUpperCase();
+        const phev = String(r.PHEV ?? r.phev ?? 'NON PHEV').trim().toUpperCase();
+        let powertrain = 'ICE';
+        if (phev === 'PHEV') powertrain = 'PHEV';
+        else if (bev === 'BEV' || bev.includes('BEV')) powertrain = 'BEV';
+
+        if (weekFilter !== 'ALL' && week !== weekFilter) return;
+        if (familyFilter !== 'ALL' && family !== familyFilter) return;
+        if (ptFilter !== 'ALL' && powertrain !== ptFilter) return;
+        if (stationFilter !== 'ALL' && station.toUpperCase() !== stationFilter.toUpperCase()) return;
+
+        let cat = reworkType || 'Uncategorized Quality Check';
+        if (cat.toLowerCase().includes('terminal')) cat = 'Terminal Damage / Voie';
+        else if (cat.toLowerCase().includes('circuit')) cat = 'Circuit Cut / Length Variance';
+        else if (cat.toLowerCase().includes('grommet')) cat = 'Grommet Missing / Damaged';
+        else if (cat.toLowerCase().includes('insertion')) cat = 'Insertion Defect';
+        else if (cat.toLowerCase().includes('sertissage')) cat = 'Crimping / Sertissage';
+
+        // Count each affected IO once per defect category so repeated history snapshots
+        // for the same harness do not inflate the Pareto count.
+        if (!defectCountMap.has(cat)) defectCountMap.set(cat, new Set());
+        defectCountMap.get(cat).add(io);
+      });
+
+      const sorted = Array.from(defectCountMap.entries())
+        .map(([name, ioSet]) => [name, ioSet.size])
+        .sort((a, b) => b[1] - a[1]);
       const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
 
       if (sorted.length === 0) {
-        list.innerHTML = '<div style="color: var(--text-dim); font-size: 0.8rem; padding: 0.5rem 0;">No active defects logged</div>';
+        list.innerHTML = '<div style="color: var(--text-dim); font-size: 0.8rem; padding: 0.5rem 0;">No defects found in live or historical data for these filters</div>';
         return;
       }
 
@@ -3360,6 +3573,9 @@
         const barPct = Math.round((count / maxCount) * 100);
         const item = document.createElement('div');
         item.className = 'pareto-item';
+        item.title = historyAvailable
+          ? 'Combined live tracking and history; each IO counted once per defect category'
+          : 'Based on live tracking; history is loading or unavailable';
         item.onclick = () => {
           document.getElementById('defectSearchInput').value = name.split('/')[0].trim();
           renderDefectTable();
