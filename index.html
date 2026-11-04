@@ -1933,29 +1933,16 @@
 
   <script>
     const DEFAULT_CONFIG = {
-      L461_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7Zpww6tdwDQSwGJ9QxzFtKEtGCc-1_4b3b2zrPUmlm6T-zV4M9tKAXAJsSCU9_5TcAN8exaScFEqW/pub?gid=71854974&single=true&output=csv',
-      L460_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQUbbzRRU7MVBUEMtlwvaqr0zbXvc-vmKnjwTVX1r-8-dBFP7YqJOXo1EjBqlXHAimGxZM0qysGTccs/pub?gid=2047715098&single=true&output=csv',
+      L461_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTO22eGE_u31vN3cAYC4AYPwpkbeOrA_0L5_dU-9qQSSHO8LKQk42wZV64KJZ0L5lmjoc0Semx1ZD1J/pub?gid=652842013&single=true&output=csv',
+      L460_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRfVUTiVDJZYzOtCDeVSX5BsSRFkJSp6APZn3DLe8LTqmpfvfWJvmPwRBlrymKtJ5_xB32bRmsCqKhS/pub?gid=652842013&single=true&output=csv',
       L461_HISTORY_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlqmo8pfpo7LYbBvrqLuielGXFdqrIypebjRcO_Ph2IwW1lHrKw-ohS5JctaJ72MGd9pBMBkxew5v7/pub?gid=2094321585&single=true&output=csv',
       L460_HISTORY_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdaOZBWx_0wYOq7Bu-LvTxaST0MONyHF3mKNnwUw5UrTIV735knC34GAlWu3DvcGW6gG1Pq6juwvya/pub?gid=1201534735&single=true&output=csv'
     };
 
-    // URL settings are namespaced by the current hard-coded links. If the links
-    // are changed in this file and redeployed, old browser overrides are ignored.
-    // Settings saved through the configuration window still override these defaults.
-    function getUrlStorageKey(name) {
-      const seed = Object.values(DEFAULT_CONFIG).join('|');
-      let hash = 2166136261;
-      for (let i = 0; i < seed.length; i++) {
-        hash ^= seed.charCodeAt(i);
-        hash = Math.imul(hash, 16777619);
-      }
-      return `PROTO_URLCFG_${(hash >>> 0).toString(16)}_${name}`;
-    }
-
     const STATION_PIPELINE = [
       "KSK & Pre-Assy", "INSERTION", "BANDAGE", "OUT OF LINE",
-      "GROMMET TEST", "CTT", "Cotation", "OLT",
-      "Beep Production", "Beep Quality", "TORQUE", "CHANNEL", "PACKAGING"
+      "GROMMET TEST", "TORQUE", "CTT", "Cotation", "OLT",
+      "Beep Production", "Beep Quality", "CHANNEL", "PACKAGING"
     ];
 
     // State Variables
@@ -2159,9 +2146,9 @@
     function loadStoredConfig() {
       try {
         const configKey = getActiveConfigKey();
-        const activeUrl = localStorage.getItem(getUrlStorageKey(`URL_${configKey}`)) || '';
-        const storedL461 = localStorage.getItem(getUrlStorageKey('L461_URL')) || DEFAULT_CONFIG.L461_URL;
-        const storedL460 = localStorage.getItem(getUrlStorageKey('L460_URL')) || DEFAULT_CONFIG.L460_URL;
+        const activeUrl = localStorage.getItem(`PROTO_URL_${configKey}`) || '';
+        const storedL461 = localStorage.getItem('PROTO_L461_URL') || DEFAULT_CONFIG.L461_URL;
+        const storedL460 = localStorage.getItem('PROTO_L460_URL') || DEFAULT_CONFIG.L460_URL;
 
         const activeInput = document.getElementById('currentConfigUrlInput');
         const l461HistoryInput = document.getElementById('l461HistoryUrlInput');
@@ -2170,8 +2157,8 @@
         const l460Input = document.getElementById('l460UrlInput');
 
         if (activeInput) activeInput.value = activeUrl;
-        if (l461HistoryInput) l461HistoryInput.value = localStorage.getItem(getUrlStorageKey('L461_HISTORY_URL')) || DEFAULT_CONFIG.L461_HISTORY_URL;
-        if (l460HistoryInput) l460HistoryInput.value = localStorage.getItem(getUrlStorageKey('L460_HISTORY_URL')) || DEFAULT_CONFIG.L460_HISTORY_URL;
+        if (l461HistoryInput) l461HistoryInput.value = localStorage.getItem('PROTO_L461_HISTORY_URL') || DEFAULT_CONFIG.L461_HISTORY_URL;
+        if (l460HistoryInput) l460HistoryInput.value = localStorage.getItem('PROTO_L460_HISTORY_URL') || DEFAULT_CONFIG.L460_HISTORY_URL;
         if (l461Input) l461Input.value = storedL461;
         if (l460Input) l460Input.value = storedL460;
 
@@ -2201,20 +2188,18 @@
       try {
         const configKey = getActiveConfigKey();
         if (activeUrlVal) {
-          localStorage.setItem(getUrlStorageKey(`URL_${configKey}`), activeUrlVal);
+          localStorage.setItem(`PROTO_URL_${configKey}`, activeUrlVal);
         } else {
-          localStorage.removeItem(getUrlStorageKey(`URL_${configKey}`));
+          localStorage.removeItem(`PROTO_URL_${configKey}`);
         }
-        if (l461HistoryVal) localStorage.setItem(getUrlStorageKey('L461_HISTORY_URL'), l461HistoryVal);
-        else localStorage.removeItem(getUrlStorageKey('L461_HISTORY_URL'));
-        if (l460HistoryVal) localStorage.setItem(getUrlStorageKey('L460_HISTORY_URL'), l460HistoryVal);
-        else localStorage.removeItem(getUrlStorageKey('L460_HISTORY_URL'));
+        if (l461HistoryVal) localStorage.setItem('PROTO_L461_HISTORY_URL', l461HistoryVal);
+        else localStorage.removeItem('PROTO_L461_HISTORY_URL');
+        if (l460HistoryVal) localStorage.setItem('PROTO_L460_HISTORY_URL', l460HistoryVal);
+        else localStorage.removeItem('PROTO_L460_HISTORY_URL');
         // Remove the old per-build history setting so the new line-level history links are used.
-        localStorage.removeItem(getUrlStorageKey(`HISTORY_URL_${configKey}`));
-        if (l461Val) localStorage.setItem(getUrlStorageKey('L461_URL'), l461Val);
-        else localStorage.removeItem(getUrlStorageKey('L461_URL'));
-        if (l460Val) localStorage.setItem(getUrlStorageKey('L460_URL'), l460Val);
-        else localStorage.removeItem(getUrlStorageKey('L460_URL'));
+        localStorage.removeItem(`PROTO_HISTORY_URL_${configKey}`);
+        if (l461Val) localStorage.setItem('PROTO_L461_URL', l461Val);
+        if (l460Val) localStorage.setItem('PROTO_L460_URL', l460Val);
       } catch (e) {}
 
       closeConfigModal();
@@ -2224,13 +2209,13 @@
     function getActiveUrl() {
       try {
         const configKey = getActiveConfigKey();
-        const specificUrl = localStorage.getItem(getUrlStorageKey(`URL_${configKey}`));
+        const specificUrl = localStorage.getItem(`PROTO_URL_${configKey}`);
         if (specificUrl) return specificUrl;
 
         if (currentLine === 'L461') {
-          return localStorage.getItem(getUrlStorageKey('L461_URL')) || DEFAULT_CONFIG.L461_URL;
+          return localStorage.getItem('PROTO_L461_URL') || DEFAULT_CONFIG.L461_URL;
         } else {
-          return localStorage.getItem(getUrlStorageKey('L460_URL')) || DEFAULT_CONFIG.L460_URL;
+          return localStorage.getItem('PROTO_L460_URL') || DEFAULT_CONFIG.L460_URL;
         }
       } catch (e) {
         return currentLine === 'L461' ? DEFAULT_CONFIG.L461_URL : DEFAULT_CONFIG.L460_URL;
@@ -2268,7 +2253,14 @@
       if (el) el.textContent = refreshCountdown;
     }
 
+    // Temporary diagnostics: open the browser console to compare L460 and L461 load stages.
+    function logLoadTiming(configKey, stage, startedAt, details = '') {
+      const elapsed = (performance.now() - startedAt).toFixed(1);
+      console.log(`[Dashboard timing] ${configKey} | ${stage}: ${elapsed} ms${details ? ' | ' + details : ''}`);
+    }
+
     async function fetchLiveData(isManual = false) {
+      const totalStartedAt = performance.now();
       const btn = document.getElementById('btnRefresh');
       const syncPulse = document.getElementById('syncPulse');
       const errorBanner = document.getElementById('errorBanner');
@@ -2279,28 +2271,40 @@
 
       const url = getActiveUrl();
       const configKey = getActiveConfigKey();
+      console.log(`[Dashboard timing] ${configKey} | Load started${isManual ? ' (manual)' : ''}`);
+      const downloadStartedAt = performance.now();
 
       try {
         const response = await fetch(url);
+        logLoadTiming(configKey, 'Live CSV response', downloadStartedAt, `HTTP ${response.status}`);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+        const textStartedAt = performance.now();
         const csvText = await response.text();
+        logLoadTiming(configKey, 'Live CSV body download', textStartedAt, `${csvText.length.toLocaleString()} characters`);
 
         if (!csvText || csvText.length < 50) {
           throw new Error('Received empty or invalid CSV from Google Sheets');
         }
 
+        const parseStartedAt = performance.now();
         Papa.parse(csvText, {
           header: true,
           skipEmptyLines: true,
           transformHeader: h => h.replace(/\s+/g, ' ').trim(),
           transform: v => v.trim(),
           complete: function(results) {
+            logLoadTiming(configKey, 'Live CSV parse', parseStartedAt, `${(results.data || []).length.toLocaleString()} rows`);
             if (results.data && results.data.length > 0) {
               rawDataStore[configKey] = results.data;
+              const filtersStartedAt = performance.now();
               populateFilterDropdowns(results.data);
+              logLoadTiming(configKey, 'Filter dropdown update', filtersStartedAt);
+              const processStartedAt = performance.now();
               processRawData(results.data);
+              logLoadTiming(configKey, 'Dashboard processing/render', processStartedAt);
+              logLoadTiming(configKey, 'Live load to dashboard ready', totalStartedAt);
               loadHistoryForConfig(configKey);
             } else {
               throw new Error('No data rows could be extracted from CSV');
@@ -2329,8 +2333,8 @@
       // work immediately for anyone who opens a fresh copy of this HTML file.
       try {
         return currentLine === 'L461'
-          ? (localStorage.getItem(getUrlStorageKey('L461_HISTORY_URL')) || DEFAULT_CONFIG.L461_HISTORY_URL)
-          : (localStorage.getItem(getUrlStorageKey('L460_HISTORY_URL')) || DEFAULT_CONFIG.L460_HISTORY_URL);
+          ? (localStorage.getItem('PROTO_L461_HISTORY_URL') || DEFAULT_CONFIG.L461_HISTORY_URL)
+          : (localStorage.getItem('PROTO_L460_HISTORY_URL') || DEFAULT_CONFIG.L460_HISTORY_URL);
       } catch(e) {
         return currentLine === 'L461' ? DEFAULT_CONFIG.L461_HISTORY_URL : DEFAULT_CONFIG.L460_HISTORY_URL;
       }
@@ -2520,6 +2524,7 @@
     }
 
     async function loadHistoryForConfig(configKey) {
+      const historyStartedAt = performance.now();
       const url = getHistoryUrl();
       if (!url) {
         historyLoaded = false;
@@ -2527,17 +2532,25 @@
         return;
       }
       try {
+        const historyFetchStartedAt = performance.now();
         const response = await fetch(url);
+        logLoadTiming(configKey, 'History CSV response', historyFetchStartedAt, `HTTP ${response.status}`);
         if (!response.ok) throw new Error(`History HTTP ${response.status}`);
+        const historyTextStartedAt = performance.now();
         const csvText = await response.text();
+        logLoadTiming(configKey, 'History CSV body download', historyTextStartedAt, `${csvText.length.toLocaleString()} characters`);
         const mainRows = rawDataStore[configKey] || [];
+        const historyParseStartedAt = performance.now();
         Papa.parse(csvText, {
           header: true,
           skipEmptyLines: true,
           transformHeader: h => h.replace(/\s+/g, ' ').trim(),
           transform: v => v.trim(),
           complete: function(results) {
+            logLoadTiming(configKey, 'History CSV parse', historyParseStartedAt, `${(results.data || []).length.toLocaleString()} rows`);
+            const normalizeStartedAt = performance.now();
             const mapped = normalizeHistoryRows(results.data || [], mainRows);
+            logLoadTiming(configKey, 'History normalize', normalizeStartedAt, `${mapped.length.toLocaleString()} entries`);
             historyRowsStore[configKey] = mapped;
             const dateSet = new Set();
             mapped.forEach(r => { const d = historyDateKey(r.Timestamp); if (d) dateSet.add(d); });
@@ -2549,6 +2562,7 @@
             renderDefectPareto(currentFilteredUnits);
             renderAnalyticsCharts();
             if (historyMode === 'HISTORY' && historySelectedDate) renderHistoricalDate(historySelectedDate);
+            logLoadTiming(configKey, 'History load complete', historyStartedAt);
           },
           error: function(err) { setHistoryStatus('History parse error'); console.error(err); }
         });
@@ -3734,8 +3748,8 @@ _Generated by Prototype Dashboard_`;
 
   var PIPELINE = (typeof STATION_PIPELINE !== 'undefined' && Array.isArray(STATION_PIPELINE))
     ? STATION_PIPELINE.slice()
-    : ['KSK & Pre-Assy', 'INSERTION', 'BANDAGE', 'OUT OF LINE', 'GROMMET TEST', 'CTT',
-       'Cotation', 'OLT', 'Beep Production', 'Beep Quality', 'TORQUE', 'CHANNEL', 'PACKAGING'];
+    : ['KSK & Pre-Assy', 'INSERTION', 'BANDAGE', 'OUT OF LINE', 'GROMMET TEST', 'TORQUE', 'CTT',
+       'Cotation', 'OLT', 'Beep Production', 'Beep Quality', 'CHANNEL', 'PACKAGING'];
 
   var ENTRY = PIPELINE[0];
 
