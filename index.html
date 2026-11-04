@@ -1562,10 +1562,6 @@
           <svg class="icon icon-spin" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85.83 6.72 2.24L21 8"></path><path d="M21 3v5h-5"></path></svg>
           <span>Refresh</span>
         </button>
-
-        <button class="btn-action" onclick="openLinkConfigModal()" title="Configure Data Source URLs">
-          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        </button>
       </div>
     </header>
 
@@ -1934,67 +1930,6 @@
       </div>
     </section>
 
-    <!-- URL Configuration Modal -->
-    <div id="configModal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) closeConfigModal()">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Configure Data Source URLs</h2>
-          <button class="modal-close" onclick="closeConfigModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <p style="font-size: 0.8rem; color: var(--text-muted);">
-            Active Build: <strong id="modalActiveConfigName" style="color: var(--accent-primary);">L461 - VB3 - MY28</strong>
-          </p>
-
-          <div class="input-group">
-            <label for="currentConfigUrlInput">Active Build CSV Published Link</label>
-            <input type="text" id="currentConfigUrlInput" placeholder="https://docs.google.com/spreadsheets/...">
-          </div>
-
-          <div class="input-group">
-            <label for="l461HistoryUrlInput">L461 History CSV Published Link</label>
-            <input type="text" id="l461HistoryUrlInput" placeholder="https://docs.google.com/spreadsheets/...&gid=HISTORY_SHEET">
-          </div>
-
-          <div class="input-group">
-            <label for="l460HistoryUrlInput">L460 History CSV Published Link</label>
-            <input type="text" id="l460HistoryUrlInput" placeholder="https://docs.google.com/spreadsheets/...&gid=HISTORY_SHEET">
-            <small style="color:var(--text-muted);">History format: 12 columns (ID, Harness_ID, IO, Station, Percentage, Status, Timestamp, rework type, Rework station, Stopped By, Comment, PARTIE).</small>
-          </div>
-
-          <div class="input-group" style="background: rgba(255,255,255,0.03); border: 1px dashed var(--border-color); border-radius: 8px; padding: 0.8rem; margin-top: 0.5rem;">
-            <label style="color: var(--accent-primary); font-weight: 700;">📂 Local CSV Ingestion (Offline / Instant Testing)</label>
-            <div style="display: flex; gap: 0.8rem; margin-top: 0.4rem; flex-wrap: wrap;">
-              <label class="btn-action" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                📄 Load Live CSV (Raw Tracking_Data)
-                <input type="file" accept=".csv" style="display: none;" onchange="handleLocalLiveFile(this)">
-              </label>
-              <label class="btn-action" style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                📜 Load History CSV (History.csv)
-                <input type="file" accept=".csv" style="display: none;" onchange="handleLocalHistoryFile(this)">
-              </label>
-            </div>
-            <small style="color: var(--text-muted); margin-top: 6px; display: block; font-size: 0.72rem;">
-              Select <code>Raw Tracking_Data.csv</code> and <code>History.csv</code> to test instantaneous rewind & state reconstruction with zero network delay.
-            </small>
-          </div>
-
-          <div class="input-group">
-            <label for="l461UrlInput">Default L461 Master CSV Link</label>
-            <input type="text" id="l461UrlInput" placeholder="https://docs.google.com/spreadsheets/...">
-          </div>
-
-          <div class="input-group">
-            <label for="l460UrlInput">Default L460 Master CSV Link</label>
-            <input type="text" id="l460UrlInput" placeholder="https://docs.google.com/spreadsheets/...">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-action btn-primary" onclick="saveConfigAndRefresh()">Save & Sync Now</button>
-        </div>
-      </div>
-    </div>
-
     <!-- Toast Notification -->
     <div class="toast-notice" id="toastNotice">
       <svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -2057,6 +1992,16 @@
 
     function loadStoredPreferences() {
       try {
+        // Remove old custom CSV URL overrides so they cannot affect hardcoded links.
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && (/^PROTO_URL_/.test(key) || [
+            'PROTO_L461_URL', 'PROTO_L460_URL',
+            'PROTO_L461_HISTORY_URL', 'PROTO_L460_HISTORY_URL'
+          ].includes(key) || /^PROTO_HISTORY_URL_/.test(key))) {
+            localStorage.removeItem(key);
+          }
+        }
         const storedLine = localStorage.getItem('PROTO_LINE');
         if (storedLine) currentLine = storedLine;
 
@@ -2215,83 +2160,8 @@
       document.title = `Prototype Dashboard | ${currentLine} ${currentBuild} (${currentMY})`;
     }
 
-    function loadStoredConfig() {
-      try {
-        const configKey = getActiveConfigKey();
-        const activeUrl = localStorage.getItem(`PROTO_URL_${configKey}`) || '';
-        const storedL461 = localStorage.getItem('PROTO_L461_URL') || DEFAULT_CONFIG.L461_URL;
-        const storedL460 = localStorage.getItem('PROTO_L460_URL') || DEFAULT_CONFIG.L460_URL;
-
-        const activeInput = document.getElementById('currentConfigUrlInput');
-        const l461HistoryInput = document.getElementById('l461HistoryUrlInput');
-        const l460HistoryInput = document.getElementById('l460HistoryUrlInput');
-        const l461Input = document.getElementById('l461UrlInput');
-        const l460Input = document.getElementById('l460UrlInput');
-
-        if (activeInput) activeInput.value = activeUrl;
-        if (l461HistoryInput) l461HistoryInput.value = localStorage.getItem('PROTO_L461_HISTORY_URL') || DEFAULT_CONFIG.L461_HISTORY_URL;
-        if (l460HistoryInput) l460HistoryInput.value = localStorage.getItem('PROTO_L460_HISTORY_URL') || DEFAULT_CONFIG.L460_HISTORY_URL;
-        if (l461Input) l461Input.value = storedL461;
-        if (l460Input) l460Input.value = storedL460;
-
-        const modalConfigName = document.getElementById('modalActiveConfigName');
-        if (modalConfigName) modalConfigName.textContent = `${currentLine} - ${currentBuild} - ${currentMY}`;
-      } catch (e) {}
-    }
-
-    function openLinkConfigModal() {
-      loadStoredConfig();
-      const modal = document.getElementById('configModal');
-      if (modal) modal.style.display = 'flex';
-    }
-
-    function closeConfigModal() {
-      const modal = document.getElementById('configModal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    function saveConfigAndRefresh() {
-      const activeUrlVal = (document.getElementById('currentConfigUrlInput').value || '').trim();
-      const l461HistoryVal = (document.getElementById('l461HistoryUrlInput').value || '').trim();
-      const l460HistoryVal = (document.getElementById('l460HistoryUrlInput').value || '').trim();
-      const l461Val = (document.getElementById('l461UrlInput').value || '').trim();
-      const l460Val = (document.getElementById('l460UrlInput').value || '').trim();
-
-      try {
-        const configKey = getActiveConfigKey();
-        if (activeUrlVal) {
-          localStorage.setItem(`PROTO_URL_${configKey}`, activeUrlVal);
-        } else {
-          localStorage.removeItem(`PROTO_URL_${configKey}`);
-        }
-        if (l461HistoryVal) localStorage.setItem('PROTO_L461_HISTORY_URL', l461HistoryVal);
-        else localStorage.removeItem('PROTO_L461_HISTORY_URL');
-        if (l460HistoryVal) localStorage.setItem('PROTO_L460_HISTORY_URL', l460HistoryVal);
-        else localStorage.removeItem('PROTO_L460_HISTORY_URL');
-        // Remove the old per-build history setting so the new line-level history links are used.
-        localStorage.removeItem(`PROTO_HISTORY_URL_${configKey}`);
-        if (l461Val) localStorage.setItem('PROTO_L461_URL', l461Val);
-        if (l460Val) localStorage.setItem('PROTO_L460_URL', l460Val);
-      } catch (e) {}
-
-      closeConfigModal();
-      fetchLiveData(true);
-    }
-
     function getActiveUrl() {
-      try {
-        const configKey = getActiveConfigKey();
-        const specificUrl = localStorage.getItem(`PROTO_URL_${configKey}`);
-        if (specificUrl) return specificUrl;
-
-        if (currentLine === 'L461') {
-          return localStorage.getItem('PROTO_L461_URL') || DEFAULT_CONFIG.L461_URL;
-        } else {
-          return localStorage.getItem('PROTO_L460_URL') || DEFAULT_CONFIG.L460_URL;
-        }
-      } catch (e) {
-        return currentLine === 'L461' ? DEFAULT_CONFIG.L461_URL : DEFAULT_CONFIG.L460_URL;
-      }
+      return currentLine === 'L461' ? DEFAULT_CONFIG.L461_URL : DEFAULT_CONFIG.L460_URL;
     }
 
     function onTargetQtyChange(val) {
@@ -2390,7 +2260,7 @@
       } catch (err) {
         console.error('Fetch error:', err);
         if (errorBanner) {
-          errorBanner.innerHTML = `<strong>⚠️ Data Sync Notice:</strong> ${err.message}. If running locally, please open via GitHub Pages / HTTPS or configure custom published CSV URL.`;
+          errorBanner.innerHTML = `<strong>⚠️ Data Sync Notice:</strong> ${err.message}. Please open this dashboard through GitHub Pages / HTTPS and verify the hardcoded CSV link in the source code.`;
           errorBanner.style.display = 'block';
         }
       } finally {
@@ -2401,15 +2271,7 @@
     }
 
     function getHistoryUrl() {
-      // Custom links remain editable per browser; hardcoded defaults make the dashboard
-      // work immediately for anyone who opens a fresh copy of this HTML file.
-      try {
-        return currentLine === 'L461'
-          ? (localStorage.getItem('PROTO_L461_HISTORY_URL') || DEFAULT_CONFIG.L461_HISTORY_URL)
-          : (localStorage.getItem('PROTO_L460_HISTORY_URL') || DEFAULT_CONFIG.L460_HISTORY_URL);
-      } catch(e) {
-        return currentLine === 'L461' ? DEFAULT_CONFIG.L461_HISTORY_URL : DEFAULT_CONFIG.L460_HISTORY_URL;
-      }
+      return currentLine === 'L461' ? DEFAULT_CONFIG.L461_HISTORY_URL : DEFAULT_CONFIG.L460_HISTORY_URL;
     }
 
     // Robust DateTime Parser supporting all formats (MM/DD/YYYY, M/D/YY, ISO, 14-digit AppSheet)
@@ -2906,75 +2768,6 @@
     function setHistoryStatus(msg) {
       const el = document.getElementById('historyStatusText');
       if (el) el.textContent = msg;
-    }
-
-    function handleLocalLiveFile(input) {
-      const file = input.files && input.files[0];
-      if (!file) return;
-      const configKey = getActiveConfigKey();
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: h => h.replace(/\s+/g, ' ').trim(),
-        transform: v => v.trim(),
-        complete: function(results) {
-          if (results.data && results.data.length > 0) {
-            rawDataStore[configKey] = results.data;
-            populateFilterDropdowns(results.data);
-            processRawData(results.data);
-            showToast(`Loaded ${results.data.length} live records from ${file.name}`);
-            if (historyRowsStore[configKey] && historyRowsStore[configKey].length) {
-              historyRowsStore[configKey] = normalizeHistoryRows(historyRowsStore[configKey], results.data);
-              renderDefectPareto(currentFilteredUnits);
-            }
-          } else {
-            alert('No data rows found in selected CSV.');
-          }
-        },
-        error: function(err) {
-          alert('Error parsing CSV: ' + err.message);
-        }
-      });
-    }
-
-    function handleLocalHistoryFile(input) {
-      const file = input.files && input.files[0];
-      if (!file) return;
-      const configKey = getActiveConfigKey();
-      const mainRows = rawDataStore[configKey] || [];
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        transformHeader: h => h.replace(/\s+/g, ' ').trim(),
-        transform: v => v.trim(),
-        complete: function(results) {
-          if (results.data && results.data.length > 0) {
-            const mapped = normalizeHistoryRows(results.data, mainRows);
-            historyRowsStore[configKey] = mapped;
-            const dateSet = new Set();
-            mapped.forEach(r => { const d = historyDateKey(r.Timestamp); if (d) dateSet.add(d); });
-            (rawDataStore[configKey] || []).forEach(r => { const d = historyDateKey(r.Timestamp); if (d) dateSet.add(d); });
-            historyDatesStore[configKey] = Array.from(dateSet).sort();
-            historyLoaded = true;
-            updateHistoryPicker();
-            setHistoryStatus(`${mapped.length.toLocaleString()} history entries • ${historyDatesStore[configKey].length} dates from ${file.name}`);
-            showToast(`Loaded ${mapped.length} history records across ${historyDatesStore[configKey].length} dates`);
-            renderDefectPareto(currentFilteredUnits);
-            if (historyDatesStore[configKey].length > 0) {
-              const latestDate = historyDatesStore[configKey][historyDatesStore[configKey].length - 1];
-              const picker = document.getElementById('historyDatePicker');
-              if (picker) picker.value = latestDate;
-              const dateSelect = document.getElementById('historyDateSelect');
-              if (dateSelect) dateSelect.value = latestDate;
-            }
-          } else {
-            alert('No data rows found in history CSV.');
-          }
-        },
-        error: function(err) {
-          alert('Error parsing history CSV: ' + err.message);
-        }
-      });
     }
 
     function populateFilterDropdowns(rows) {
