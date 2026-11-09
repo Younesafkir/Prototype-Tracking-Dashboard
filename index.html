@@ -264,22 +264,14 @@
       letter-spacing: 0.5px;
     }
 
-    .target-box input {
-      width: 55px;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--border-accent);
+    .target-box span {
+      min-width: 32px;
       color: var(--text-main);
       padding: 2px 4px;
       font-family: var(--font-mono);
       font-weight: 700;
       font-size: 0.85rem;
       text-align: center;
-    }
-
-    .target-box input:focus {
-      outline: none;
-      border-color: var(--accent-primary);
     }
 
     .sync-status-badge {
@@ -1544,8 +1536,8 @@
       <!-- Action Controls -->
       <div class="action-controls">
         <div class="target-box" title="Total planned harness quantity">
-          <label for="targetQtyInput">Target:</label>
-          <input type="number" id="targetQtyInput" value="46" min="1" onchange="onTargetQtyChange(this.value)">
+          <label>Target:</label>
+          <span id="targetQtyDisplay">46</span>
         </div>
 
         <div class="sync-status-badge">
@@ -1946,6 +1938,12 @@
       L460_HISTORY_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQdaOZBWx_0wYOq7Bu-LvTxaST0MONyHF3mKNnwUw5UrTIV735knC34GAlWu3DvcGW6gG1Pq6juwvya/pub?gid=1201534735&single=true&output=csv'
     };
 
+    // Planned total harness quantity for each production line. Change these values here.
+    const DEFAULT_TARGETS = {
+      L461: 44,
+      L460: 61
+    };
+
     const STATION_PIPELINE = [
       "KSK & Pre-Assy", "INSERTION", "BANDAGE", "OUT OF LINE",
       "GROMMET TEST", "TORQUE", "CTT", "Cotation", "OLT",
@@ -1980,6 +1978,7 @@
     // Application Lifecycle
     document.addEventListener('DOMContentLoaded', () => {
       loadStoredPreferences();
+      updateTargetDisplay();
       updateHeaderBadges();
       populateStationFilterDropdown();
       fetchLiveData();
@@ -2027,8 +2026,7 @@
         document.getElementById('selectBuild').value = currentBuild;
         document.getElementById('selectMY').value = currentMY;
 
-        const storedTarget = localStorage.getItem(`PROTO_${getActiveConfigKey()}_TARGET`) || 46;
-        document.getElementById('targetQtyInput').value = storedTarget;
+        updateTargetDisplay();
       } catch (e) {}
     }
 
@@ -2135,8 +2133,7 @@
       updateHeaderBadges();
 
       try {
-        const storedTarget = localStorage.getItem(`PROTO_${getActiveConfigKey()}_TARGET`) || 46;
-        document.getElementById('targetQtyInput').value = storedTarget;
+        updateTargetDisplay();
       } catch (e) {}
 
       selectedStationFilter = 'ALL';
@@ -2164,15 +2161,14 @@
       return currentLine === 'L461' ? DEFAULT_CONFIG.L461_URL : DEFAULT_CONFIG.L460_URL;
     }
 
-    function onTargetQtyChange(val) {
-      const num = parseInt(val) || 1;
-      try {
-        localStorage.setItem(`PROTO_${getActiveConfigKey()}_TARGET`, num);
-      } catch (e) {}
-      const configKey = getActiveConfigKey();
-      if (rawDataStore[configKey]) {
-        processRawData(rawDataStore[configKey]);
-      }
+    function getCurrentTargetQty() {
+      const target = Number(DEFAULT_TARGETS[currentLine]);
+      return Number.isFinite(target) && target > 0 ? target : 46;
+    }
+
+    function updateTargetDisplay() {
+      const targetDisplay = document.getElementById('targetQtyDisplay');
+      if (targetDisplay) targetDisplay.textContent = getCurrentTargetQty().toLocaleString();
     }
 
     function startCountdownTimer() {
@@ -2900,9 +2896,7 @@
       document.getElementById('filteredCount').textContent = totalFilteredIOs;
       document.getElementById('totalScannedCount').textContent = totalScanned;
 
-      const targetInput = document.getElementById('targetQtyInput');
-      let targetQty = parseInt(targetInput.value) || totalFilteredIOs || 46;
-      if (targetQty < totalFilteredIOs) targetQty = totalFilteredIOs;
+      const targetQty = getCurrentTargetQty();
 
       // Sequential 13 Station Propagation Math
       const stationStats = STATION_PIPELINE.map(name => ({
